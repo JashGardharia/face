@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ESP32 Face Recognition Lock</title>
+    <style>
+        body {
+            background-color: #121212;
+            color: #00e5ff;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            text-align: center;
+            margin-top: 20px;
+        }
+        #webcam-container {
+            margin: 20px auto;
+            border-radius: 12px;
+            overflow: hidden;
+            width: 320px;
+            height: 240px;
+            border: 2px solid #00e5ff;
+            box-shadow: 0 0 15px rgba(0, 229, 255, 0.4);
+        }
+        .btn {
+            background: #003366;
+            color: #00e5ff;
+            border: 1px solid #00e5ff;
+            padding: 12px 24px;
+            font-size: 16px;
+            cursor: pointer;
+            border-radius: 8px;
+            font-weight: bold;
+            transition: 0.3s;
+        }
+        .btn:hover {
+            background: #00e5ff;
+            color: #003366;
+            box-shadow: 0 0 10px #00e5ff;
+        }
+        #label-container {
+            margin-top: 15px;
+            font-size: 20px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <h1>Face Detection System</h1>
+    <p>Connected to ESP32: Exhibition_ESP32</p>
+    
+    <button class="btn" type="button" onclick="init()">Start Camera & Load Model</button>
+    <div id="webcam-container"></div>
+    <div id="label-container"></div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@latest/dist/tf.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@teachablemachine/image@latest/dist/teachablemachine-image.min.js"></script>
+
+    <script>
+        // 1. Point to the local IP of your ESP32 Access Point
+        const ESP32_IP = "192.168.4.1";
+
+        // 2. Point to the downloaded Teachable Machine model location 
+        // Note: Put the folder "model" (containing model.json and weights.bin) in the same directory as this HTML file.
+        const URL = "./model/";
+
+        let model, webcam, labelContainer, maxPredictions;
+        let isTriggered = false;
+
+        async function init() {
+            const modelURL = URL + "model.json";
+            const metadataURL = URL + "metadata.json";
+
+            model = await tmImage.load(modelURL, metadataURL);
+            maxPredictions = model.getTotalClasses();
+
+            const flip = true; 
+            webcam = new tmImage.Webcam(320, 240, flip);
+            await webcam.setup(); 
+            await webcam.play();
+            window.requestAnimationFrame(loop);
+
+            document.getElementById("webcam-container").appendChild(webcam.canvas);
+            labelContainer = document.getElementById("label-container");
+            for (let i = 0; i < maxPredictions; i++) {
+                labelContainer.appendChild(document.createElement("div"));
+            }
+        }
+
+        async function loop() {
+            webcam.update();
+            await predict();
+            window.requestAnimationFrame(loop);
+        }
+
+        async function predict() {
+            const prediction = await model.predict(webcam.canvas);
+            
+            // Assume the first class is "Face" and second class is "Background" or "No Face"
+            let highestProb = prediction[0].probability.toFixed(2);
+            let className = prediction[0].className;
+            
+            labelContainer.childNodes[0].innerHTML = `${className}: ${highestProb}`;
+
+            // Check if face is detected (change index and probability threshold based on your needs)
+            if (prediction[0].className === "Face" && prediction[0].probability > 0.85) {
+                if (!isTriggered) {
+                    isTriggered = true;
+                    triggerServo();
+                }
+            } else {
+                isTriggered = false; // Reset the trigger when the user is not in front of the camera
+            }
+        }
+
+        function triggerServo() {
+            const url = `http://${ESP32_IP}/open`;
+            console.log("Sending request to: " + url);
+
+            fetch(url, { mode: 'no-cors' })
+                .then(response => {
+                    console.log("Signal sent to ESP32 successfully.");
+                })
+                .catch(err => {
+                    console.error("Connection error: ", err);
+                });
+        }
+    </script>
+</body>
+</html>
