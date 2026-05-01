@@ -41,6 +41,7 @@
             margin-top: 15px;
             font-size: 20px;
             font-weight: bold;
+            line-height: 1.6;
         }
     </style>
 </head>
@@ -56,10 +57,7 @@
     <script src="https://cdn.jsdelivr.net/npm/@teachablemachine/image@latest/dist/teachablemachine-image.min.js"></script>
 
     <script>
-        // Use your ESP32's local Access Point IP
         const ESP32_IP = "192.168.4.1";
-        
-        // Relative URL points to the /model folder in your GitHub repository
         const URL = "./model/";
 
         let model, webcam, labelContainer, maxPredictions;
@@ -80,6 +78,8 @@
 
             document.getElementById("webcam-container").appendChild(webcam.canvas);
             labelContainer = document.getElementById("label-container");
+            
+            // Create a div for each trained class dynamically
             for (let i = 0; i < maxPredictions; i++) {
                 labelContainer.appendChild(document.createElement("div"));
             }
@@ -94,18 +94,24 @@
         async function predict() {
             const prediction = await model.predict(webcam.canvas);
             
-            let highestProb = prediction[0].probability.toFixed(2);
-            let className = prediction[0].className;
-            
-            labelContainer.childNodes[0].innerHTML = `${className}: ${highestProb}`;
+            // Loop through all trained classes (e.g., 0 = "Me", 1 = "Not Me", 2 = "No Match")
+            for (let i = 0; i < maxPredictions; i++) {
+                const className = prediction[i].className;
+                
+                // Multiply probability by 100 to get a whole percentage number
+                const percentage = Math.round(prediction[i].probability * 100);
+                
+                labelContainer.childNodes[i].innerHTML = `${className}: ${percentage}%`;
 
-            if (prediction[0].className === "Face" && prediction[0].probability > 0.85) {
-                if (!isTriggered) {
-                    isTriggered = true;
-                    triggerServo();
+                // Add condition checks to your active class (e.g., if the first class is "Me")
+                if (prediction[0].className === "Me" && prediction[0].probability > 0.85) {
+                    if (!isTriggered) {
+                        isTriggered = true;
+                        triggerServo();
+                    }
+                } else {
+                    isTriggered = false;
                 }
-            } else {
-                isTriggered = false;
             }
         }
 
