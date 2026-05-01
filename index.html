@@ -3,12 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ESP32 Face Recognition Lock</title>
+    <title>Exhibition Face Lock</title>
     <style>
         body {
-            background-color: #121212;
-            color: #00e5ff;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #0f172a;
+            color: #38bdf8;
+            font-family: 'Segoe UI', system-ui, sans-serif;
             text-align: center;
             margin-top: 20px;
         }
@@ -18,13 +18,13 @@
             overflow: hidden;
             width: 320px;
             height: 240px;
-            border: 2px solid #00e5ff;
-            box-shadow: 0 0 15px rgba(0, 229, 255, 0.4);
+            border: 2px solid #38bdf8;
+            box-shadow: 0 0 15px rgba(56, 189, 248, 0.3);
         }
         .btn {
-            background: #003366;
-            color: #00e5ff;
-            border: 1px solid #00e5ff;
+            background: #0e4429;
+            color: #38bdf8;
+            border: 1px solid #38bdf8;
             padding: 12px 24px;
             font-size: 16px;
             cursor: pointer;
@@ -33,9 +33,9 @@
             transition: 0.3s;
         }
         .btn:hover {
-            background: #00e5ff;
-            color: #003366;
-            box-shadow: 0 0 10px #00e5ff;
+            background: #2ea043;
+            color: #ffffff;
+            box-shadow: 0 0 10px #38bdf8;
         }
         #label-container {
             margin-top: 15px;
@@ -46,7 +46,7 @@
 </head>
 <body>
     <h1>Face Detection System</h1>
-    <p>Connected to ESP32: Exhibition_ESP32</p>
+    <p>Hosted via GitHub Pages (HTTPS)</p>
     
     <button class="btn" type="button" onclick="init()">Start Camera & Load Model</button>
     <div id="webcam-container"></div>
@@ -56,11 +56,10 @@
     <script src="https://cdn.jsdelivr.net/npm/@teachablemachine/image@latest/dist/teachablemachine-image.min.js"></script>
 
     <script>
-        // 1. Point to the local IP of your ESP32 Access Point
+        // Use your ESP32's local Access Point IP
         const ESP32_IP = "192.168.4.1";
-
-        // 2. Point to the downloaded Teachable Machine model location 
-        // Note: Put the folder "model" (containing model.json and weights.bin) in the same directory as this HTML file.
+        
+        // Relative URL points to the /model folder in your GitHub repository
         const URL = "./model/";
 
         let model, webcam, labelContainer, maxPredictions;
@@ -95,20 +94,18 @@
         async function predict() {
             const prediction = await model.predict(webcam.canvas);
             
-            // Assume the first class is "Face" and second class is "Background" or "No Face"
             let highestProb = prediction[0].probability.toFixed(2);
             let className = prediction[0].className;
             
             labelContainer.childNodes[0].innerHTML = `${className}: ${highestProb}`;
 
-            // Check if face is detected (change index and probability threshold based on your needs)
             if (prediction[0].className === "Face" && prediction[0].probability > 0.85) {
                 if (!isTriggered) {
                     isTriggered = true;
                     triggerServo();
                 }
             } else {
-                isTriggered = false; // Reset the trigger when the user is not in front of the camera
+                isTriggered = false;
             }
         }
 
@@ -117,8 +114,8 @@
             console.log("Sending request to: " + url);
 
             fetch(url, { mode: 'no-cors' })
-                .then(response => {
-                    console.log("Signal sent to ESP32 successfully.");
+                .then(() => {
+                    console.log("Signal sent successfully.");
                 })
                 .catch(err => {
                     console.error("Connection error: ", err);
