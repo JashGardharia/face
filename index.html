@@ -365,7 +365,7 @@
             bar.style.width = percentage + "%";
 
             // Special color for recognized face
-            if (className === "Me" && probability > 0.85) {
+            if (className === "Me" && probability > 0.80) {
                 bar.style.background =
                     "linear-gradient(90deg, #22c55e, #4ade80)";
             } else {
@@ -377,7 +377,7 @@
         // Trigger servo once
         if (
             prediction[0].className === "Me" &&
-            prediction[0].probability > 0.85
+            prediction[0].probability > 0.80
         ) {
             if (!isTriggered) {
                 isTriggered = true;
