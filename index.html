@@ -1,132 +1,406 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Face Recognition Model</title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>AI Face Recognition System</title>
+
     <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
         body {
-            background-color: #0f172a;
-            color: #38bdf8;
-            font-family: 'Segoe UI', system-ui, sans-serif;
-            text-align: center;
-            margin-top: 20px;
+            min-height: 100vh;
+            background:
+                radial-gradient(circle at top left, #1e293b 0%, #0f172a 40%),
+                linear-gradient(to bottom, #020617, #0f172a);
+            font-family: Inter, Segoe UI, sans-serif;
+            color: #e2e8f0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 30px;
+            overflow-x: hidden;
         }
+
+        .container {
+            width: 100%;
+            max-width: 1100px;
+            background: rgba(15, 23, 42, 0.7);
+            border: 1px solid rgba(255,255,255,0.08);
+            backdrop-filter: blur(20px);
+            border-radius: 28px;
+            padding: 30px;
+            box-shadow:
+                0 0 50px rgba(56, 189, 248, 0.08),
+                inset 0 0 30px rgba(255,255,255,0.03);
+        }
+
+        .top-section {
+            display: flex;
+            gap: 30px;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .camera-card {
+            position: relative;
+        }
+
         #webcam-container {
-            margin: 20px auto;
-            border-radius: 12px;
+            width: 640px;
+            max-width: 100%;
+            height: 480px;
+            border-radius: 24px;
             overflow: hidden;
+            position: relative;
+            border: 1px solid rgba(56,189,248,0.3);
+            background: #020617;
+            box-shadow:
+                0 0 25px rgba(56,189,248,0.15),
+                inset 0 0 30px rgba(255,255,255,0.03);
+        }
+
+        canvas {
+            width: 100% !important;
+            height: 100% !important;
+            object-fit: cover;
+        }
+
+        .scanner-line {
+            position: absolute;
+            width: 100%;
+            height: 2px;
+            background: linear-gradient(to right, transparent, #38bdf8, transparent);
+            box-shadow: 0 0 15px #38bdf8;
+            animation: scan 3s linear infinite;
+        }
+
+        @keyframes scan {
+            0% {
+                top: 0%;
+            }
+            50% {
+                top: 100%;
+            }
+            100% {
+                top: 0%;
+            }
+        }
+
+        .side-panel {
             width: 320px;
-            height: 240px;
-            border: 2px solid #38bdf8;
-            box-shadow: 0 0 15px rgba(56, 189, 248, 0.3);
+            max-width: 100%;
         }
-        .btn {
-            background: #0e4429;
-            color: #38bdf8;
-            border: 1px solid #38bdf8;
-            padding: 12px 24px;
-            font-size: 16px;
-            cursor: pointer;
-            border-radius: 8px;
-            font-weight: bold;
-            transition: 0.3s;
+
+        .title {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+            letter-spacing: 1px;
         }
-        .btn:hover {
-            background: #2ea043;
-            color: #ffffff;
-            box-shadow: 0 0 10px #38bdf8;
-        }
-        #label-container {
-            margin-top: 15px;
-            font-size: 20px;
-            font-weight: bold;
+
+        .subtitle {
+            color: #94a3b8;
+            margin-bottom: 25px;
             line-height: 1.6;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 15px;
+            border: none;
+            border-radius: 16px;
+            background: linear-gradient(135deg, #0ea5e9, #2563eb);
+            color: white;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.35s;
+            box-shadow: 0 10px 30px rgba(37, 99, 235, 0.3);
+        }
+
+        .btn:hover {
+            transform: translateY(-2px) scale(1.01);
+            box-shadow: 0 15px 35px rgba(37, 99, 235, 0.45);
+        }
+
+        .status-box {
+            margin-top: 25px;
+            background: rgba(255,255,255,0.04);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 18px;
+            padding: 18px;
+        }
+
+        .status-title {
+            font-size: 14px;
+            color: #94a3b8;
+            margin-bottom: 15px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .prediction-item {
+            margin-bottom: 18px;
+        }
+
+        .prediction-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+
+        .prediction-name {
+            color: #e2e8f0;
+            font-weight: 500;
+        }
+
+        .prediction-percent {
+            color: #38bdf8;
+            font-weight: 700;
+        }
+
+        .bar-bg {
+            width: 100%;
+            height: 12px;
+            background: rgba(255,255,255,0.06);
+            border-radius: 999px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .bar-fill {
+            height: 100%;
+            width: 0%;
+            border-radius: 999px;
+            transition: width 0.25s ease;
+            background: linear-gradient(
+                90deg,
+                #06b6d4,
+                #38bdf8,
+                #60a5fa
+            );
+            box-shadow:
+                0 0 10px rgba(56,189,248,0.6),
+                0 0 20px rgba(56,189,248,0.3);
+        }
+
+        .footer {
+            margin-top: 20px;
+            color: #64748b;
+            font-size: 13px;
+            text-align: center;
+        }
+
+        .live-dot {
+            display: inline-block;
+            width: 10px;
+            height: 10px;
+            background: #22c55e;
+            border-radius: 50%;
+            margin-right: 8px;
+            box-shadow: 0 0 10px #22c55e;
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+            0% {
+                transform: scale(1);
+                opacity: 1;
+            }
+            50% {
+                transform: scale(1.5);
+                opacity: 0.5;
+            }
+            100% {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        @media(max-width: 900px) {
+            .top-section {
+                flex-direction: column;
+            }
+
+            #webcam-container {
+                height: 320px;
+            }
         }
     </style>
 </head>
+
 <body>
-    <h1>Face Detection System</h1>
-    <p>Hosted via GitHub Pages (HTTPS)</p>
-    
-    <button class="btn" type="button" onclick="init()">Start Camera & Load Model</button>
-    <div id="webcam-container"></div>
-    <div id="label-container"></div>
 
-    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@latest/dist/tf.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@teachablemachine/image@latest/dist/teachablemachine-image.min.js"></script>
+<div class="container">
 
-    <script>
-        const ESP32_IP = "192.168.4.1";
-        const URL = "./model/";
+    <div class="top-section">
 
-        let model, webcam, labelContainer, maxPredictions;
-        let isTriggered = false;
+        <div class="camera-card">
+            <div id="webcam-container">
+                <div class="scanner-line"></div>
+            </div>
+        </div>
 
-        async function init() {
-            const modelURL = URL + "model.json";
-            const metadataURL = URL + "metadata.json";
+        <div class="side-panel">
 
-            model = await tmImage.load(modelURL, metadataURL);
-            maxPredictions = model.getTotalClasses();
+            <h1 class="title">AI Face Recognition</h1>
 
-            const flip = true; 
-            webcam = new tmImage.Webcam(320, 240, flip);
-            await webcam.setup(); 
-            await webcam.play();
-            window.requestAnimationFrame(loop);
+            <p class="subtitle">
+                Real-time neural recognition system powered by TensorFlow.js.
+                Humanity really looked at webcams and decided:
+                “What if door lock but suspiciously intelligent?” 🤖
+            </p>
 
-            document.getElementById("webcam-container").appendChild(webcam.canvas);
-            labelContainer = document.getElementById("label-container");
-            
-            // Create a div for each trained class dynamically
-            for (let i = 0; i < maxPredictions; i++) {
-                labelContainer.appendChild(document.createElement("div"));
+            <button class="btn" onclick="init()">
+                Initialize Camera System
+            </button>
+
+            <div class="status-box">
+
+                <div class="status-title">
+                    <span class="live-dot"></span>
+                    Live Predictions
+                </div>
+
+                <div id="label-container"></div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <div class="footer">
+        Secure Vision Authentication • ESP32 Integrated
+    </div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@latest/dist/tf.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@teachablemachine/image@latest/dist/teachablemachine-image.min.js"></script>
+
+<script>
+    const ESP32_IP = "192.168.4.1";
+    const URL = "./model/";
+
+    let model, webcam, labelContainer, maxPredictions;
+    let isTriggered = false;
+
+    async function init() {
+
+        const modelURL = URL + "model.json";
+        const metadataURL = URL + "metadata.json";
+
+        model = await tmImage.load(modelURL, metadataURL);
+        maxPredictions = model.getTotalClasses();
+
+        const flip = true;
+
+        webcam = new tmImage.Webcam(640, 480, flip);
+
+        await webcam.setup();
+        await webcam.play();
+
+        window.requestAnimationFrame(loop);
+
+        document.getElementById("webcam-container")
+            .appendChild(webcam.canvas);
+
+        labelContainer = document.getElementById("label-container");
+
+        labelContainer.innerHTML = "";
+
+        // Create prediction bars
+        for (let i = 0; i < maxPredictions; i++) {
+
+            const item = document.createElement("div");
+            item.className = "prediction-item";
+
+            item.innerHTML = `
+                <div class="prediction-header">
+                    <span class="prediction-name">Class</span>
+                    <span class="prediction-percent">0%</span>
+                </div>
+
+                <div class="bar-bg">
+                    <div class="bar-fill"></div>
+                </div>
+            `;
+
+            labelContainer.appendChild(item);
+        }
+    }
+
+    async function loop() {
+        webcam.update();
+        await predict();
+        window.requestAnimationFrame(loop);
+    }
+
+    async function predict() {
+
+        const prediction = await model.predict(webcam.canvas);
+
+        for (let i = 0; i < maxPredictions; i++) {
+
+            const className = prediction[i].className;
+            const probability = prediction[i].probability;
+            const percentage = Math.round(probability * 100);
+
+            const item = labelContainer.childNodes[i];
+
+            item.querySelector(".prediction-name").innerText = className;
+            item.querySelector(".prediction-percent").innerText = percentage + "%";
+
+            const bar = item.querySelector(".bar-fill");
+            bar.style.width = percentage + "%";
+
+            // Special color for recognized face
+            if (className === "Me" && probability > 0.85) {
+                bar.style.background =
+                    "linear-gradient(90deg, #22c55e, #4ade80)";
+            } else {
+                bar.style.background =
+                    "linear-gradient(90deg, #06b6d4, #38bdf8, #60a5fa)";
             }
         }
 
-        async function loop() {
-            webcam.update();
-            await predict();
-            window.requestAnimationFrame(loop);
-        }
-
-        async function predict() {
-            const prediction = await model.predict(webcam.canvas);
-            
-            // Loop through all trained classes (e.g., 0 = "Me", 1 = "Not Me", 2 = "No Match")
-            for (let i = 0; i < maxPredictions; i++) {
-                const className = prediction[i].className;
-                
-                // Multiply probability by 100 to get a whole percentage number
-                const percentage = Math.round(prediction[i].probability * 100);
-                
-                labelContainer.childNodes[i].innerHTML = `${className}: ${percentage}%`;
-
-                // Add condition checks to your active class (e.g., if the first class is "Me")
-                if (prediction[0].className === "Me" && prediction[0].probability > 0.85) {
-                    if (!isTriggered) {
-                        isTriggered = true;
-                        triggerServo();
-                    }
-                } else {
-                    isTriggered = false;
-                }
+        // Trigger servo once
+        if (
+            prediction[0].className === "Me" &&
+            prediction[0].probability > 0.85
+        ) {
+            if (!isTriggered) {
+                isTriggered = true;
+                triggerServo();
             }
+        } else {
+            isTriggered = false;
         }
+    }
 
-        function triggerServo() {
-            const url = `http://${ESP32_IP}/open`;
-            console.log("Sending request to: " + url);
+    function triggerServo() {
 
-            fetch(url, { mode: 'no-cors' })
-                .then(() => {
-                    console.log("Signal sent successfully.");
-                })
-                .catch(err => {
-                    console.error("Connection error: ", err);
-                });
-        }
-    </script>
+        const url = `http://${ESP32_IP}/open`;
+
+        console.log("Sending request to: " + url);
+
+        fetch(url, { mode: "no-cors" })
+            .then(() => {
+                console.log("Signal sent successfully.");
+            })
+            .catch(err => {
+                console.error("Connection error: ", err);
+            });
+    }
+</script>
+
 </body>
 </html>
