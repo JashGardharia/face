@@ -336,6 +336,100 @@
             .title { font-size: 1.4rem; }
             .subtitle { font-size: 0.95rem; }
             .status-box { padding: 14px; }
+
+        @media (max-width: 768px) {
+
+            body {
+                padding: 12px;
+                align-items: flex-start;
+            }
+
+            .container {
+                padding: 18px;
+                border-radius: 22px;
+            }
+    
+            .top-section {
+                flex-direction: column;
+                gap: 20px;
+            }
+
+            .camera-card,
+            .side-panel {
+                width: 100%;
+            }
+
+            #webcam-container {
+                width: 100%;
+                height: auto;
+                aspect-ratio: 4 / 3;
+                border-radius: 18px;
+            }
+
+            canvas {
+                width: 100% !important;
+                height: 100% !important;
+            }
+
+            .title {
+                font-size: 1.6rem;
+                text-align: center;
+            }
+        
+            .subtitle {
+                font-size: 0.95rem;
+                text-align: center;
+                line-height: 1.5;
+            }
+
+            .btn {
+                padding: 14px;
+                font-size: 0.95rem;
+                border-radius: 14px;
+            }
+
+            .status-box {
+                padding: 15px;
+                border-radius: 16px;
+            }
+
+            .prediction-header {
+                font-size: 13px;
+            }
+
+            .bar-bg {
+                height: 10px;
+            }
+
+            .footer {
+                font-size: 12px;
+                line-height: 1.5;
+                margin-top: 18px;
+            }
+        }
+
+        @media (max-width: 480px) {
+
+            .container {
+                padding: 14px;
+            }
+
+            .title {
+                font-size: 1.35rem;
+            }
+
+            .subtitle {
+                font-size: 0.88rem;
+            }
+
+            .btn {
+                font-size: 0.9rem;
+            }
+
+            .status-title {
+                font-size: 12px;
+            }
+        }
         }
     </style>
 </head>
