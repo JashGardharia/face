@@ -235,7 +235,57 @@
             #webcam-container {
                 height: 320px;
             }
-        }
+        }.container {
+    margin: auto;
+}
+
+img,
+canvas,
+video {
+    max-width: 100%;
+    height: auto;
+}
+
+@media screen and (max-width: 768px) {
+
+    body {
+        padding: 10px;
+    }
+
+    .container {
+        padding: 16px;
+        border-radius: 20px;
+    }
+
+    .top-section {
+        flex-direction: column;
+    }
+
+    .camera-card,
+    .side-panel {
+        width: 100%;
+    }
+
+    #webcam-container {
+        width: 100%;
+        height: auto;
+        aspect-ratio: 4 / 3;
+    }
+
+    .title {
+        font-size: 1.5rem;
+        text-align: center;
+    }
+
+    .subtitle {
+        text-align: center;
+        font-size: 0.92rem;
+    }
+
+    .btn {
+        width: 100%;
+    }
+}
     </style>
 </head>
 
