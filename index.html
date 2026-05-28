@@ -53,7 +53,7 @@
 
         .camera-card {
             position: relative;
-            flex: 1 1 500px;
+            flex: 1 1 550px;
             max-width: 640px;
             width: 100%;
         }
@@ -73,7 +73,6 @@
                 inset 0 0 30px rgba(255,255,255,0.03);
         }
 
-        /* Crucial fix for Teachable Machine injected canvas layout */
         #webcam-container canvas {
             width: 100% !important;
             height: 100% !important;
@@ -98,7 +97,7 @@
         }
 
         .side-panel {
-            flex: 1 1 300px;
+            flex: 1 1 320px;
             max-width: 380px;
             width: 100%;
         }
@@ -198,7 +197,7 @@
         }
 
         .footer {
-            margin-top: 20px;
+            margin-top: 30px;
             color: #64748b;
             font-size: 13px;
             text-align: center;
@@ -216,46 +215,63 @@
         }
 
         @keyframes pulse {
-            0 { transform: scale(1); opacity: 1; }
-            50 { transform: scale(1.5); opacity: 0.5; }
-            100 { transform: scale(1); opacity: 1; }
+            0% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.5); opacity: 0.5; }
+            100% { transform: scale(1); opacity: 1; }
         }
 
-        /* Cleaned Media Queries for Native Mobile Rendering */
-        @media screen and (max-width: 850px) {
+        /* HARD CORE MOBILE FIXES (PC Layout left completely intact) */
+        @media screen and (max-width: 900px) {
             body {
-                padding: 12px;
+                padding: 0; /* Remove body spacing so elements can hit edges */
                 align-items: flex-start;
             }
 
             .container {
-                padding: 20px;
-                border-radius: 20px;
+                padding: 0 0 24px 0; /* Strip card padding except for bottom content */
+                background: transparent; /* Drop backing constraint */
+                border: none;
+                backdrop-filter: none;
+                box-shadow: none;
+                border-radius: 0;
             }
 
             .top-section {
                 flex-direction: column;
                 align-items: center;
-                gap: 20px;
+                gap: 25px;
             }
 
             .camera-card {
                 max-width: 100%;
+                padding: 0;
+            }
+
+            #webcam-container {
+                border-radius: 0 0 24px 24px; /* Flattens top edges to seamlessly fill screen */
+                border-left: none;
+                border-right: none;
+                border-top: none;
+                aspect-ratio: 4 / 3; /* Keeps nice cinematic landscape rectangle style */
             }
 
             .side-panel {
                 max-width: 100%;
+                padding: 0 20px; /* Gives perfect edge breathing room to text elements */
             }
 
             .title {
-                font-size: 1.6rem;
-                text-align: center;
+                font-size: 1.75rem;
+                text-align: left;
             }
 
             .subtitle {
-                text-align: center;
+                text-align: left;
                 font-size: 0.95rem;
-                margin-bottom: 20px;
+            }
+            
+            .footer {
+                padding: 0 20px;
             }
         }
     </style>
